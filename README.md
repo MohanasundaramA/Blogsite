@@ -50,14 +50,14 @@ blog-site/\
 git clone https://github.com/your-repo/blog-site.git
 cd blog-site
 ```
-2. Install Dependencies
+2. Install Dependencies\
 Ensure you have Python and pip installed. Then, install the required Python packages:
 
 ```
 pip install flask mysql-connector-python
 ```
 
-3. Database Configuration
+3. Database Configuration\
 Create a MySQL database and configure the connection details in config/db.py:
 ```
 import mysql.connector
@@ -70,7 +70,7 @@ db_connection = mysql.connector.connect(
 )
 ```
 
-4. Database Schema
+4. Database Schema\
 Execute the following SQL commands to create the necessary tables:
 ```
 CREATE TABLE users (
@@ -87,7 +87,7 @@ CREATE TABLE blogs (
     FOREIGN KEY (username) REFERENCES users(username)
 );
 ```
-5. Run the Application
+5. Run the Application\
 Start the Flask application:
 ```
 python app.py
