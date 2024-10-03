@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../static/register.css" />
+    <title>Register</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="register-box">
+            <h1>Register</h1>
+
+            {% with messages = get_flashed_messages() %} {% if messages %}
+            <div class="alert-danger">{{ messages[0] }}</div>
+            {% endif %} {% endwith %}
+
+            <div id="selection-box">
+                <p>Please select your registration type</p>
+                <button class="btn" onclick="showAdminForm()">As Admin</button>
+                <button class="btn" onclick="showUserForm()">As User</button>
+            </div>
+
+            <div id="user-form" style="display: none">
+                <form id="register-form-user" action="/register" method="POST">
+                    <h2>User Registration</h2>
+                    <div class="textbox">
+                        <input type="text" id="user-name" name="username" required placeholder="Name" />
+                    </div>
+                    <div class="textbox">
+                        <input type="email" id="user-email" name="email" required placeholder="Email" />
+                    </div>
+                    <div class="textbox">
+                        <input type="tel" id="user-mobile" name="mobile" required placeholder="Mobile Number"
+                            pattern="[0-9]{10}" />
+                    </div>
+                    <div class="textbox">
+                        <input type="password" id="user-password" name="password" required placeholder="Password" />
+                    </div>
+                    <div class="textbox">
+                        <input type="password" id="user-confirm-password" name="confirm-password" required
+                            placeholder="Confirm Password" oninput="checkPasswordMatch('user')" />
+                        <div class="error" id="user-error-message">
+                            Passwords do not match
+                        </div>
+                    </div>
+                    <input type="hidden" name="role" value="user" />
+                    <button type="submit" class="btn" id="user-register-btn" disabled>
+                        Register
+                    </button>
+                    <p class="login-link">
+                        Already have an account? <a href="/login">Login</a>
+                    </p>
+                </form>
+            </div>
+
+            <div id="admin-form" style="display: none">
+                <form id="register-form-admin" action="/register" method="POST">
+                    <h2>Admin Registration</h2>
+                    <div class="textbox">
+                        <input type="text" id="admin-verification-code" name="verification_code" required
+                            placeholder="6-digit Verification Code" minlength="6" maxlength="6" />
+                    </div>
+                    <div class="textbox">
+                        <input type="text" id="admin-name" name="username" required placeholder="Name" />
+                    </div>
+                    <div class="textbox">
+                        <input type="email" id="admin-email" name="email" required placeholder="Email" />
+                    </div>
+                    <div class="textbox">
+                        <input type="tel" id="admin-mobile" name="mobile" required placeholder="Mobile Number"
+                            pattern="[0-9]{10}" />
+                    </div>
+                    <div class="textbox">
+                        <input type="password" id="admin-password" name="password" required placeholder="Password" />
+                    </div>
+                    <div class="textbox">
+                        <input type="password" id="admin-confirm-password" name="confirm-password" required
+                            placeholder="Confirm Password" oninput="checkPasswordMatch('admin')" />
+                        <div class="error" id="admin-error-message">
+                            Passwords do not match
+                        </div>
+                    </div>
+                    <input type="hidden" name="role" value="admin" />
+                    <button type="submit" class="btn" id="admin-register-btn" disabled>
+                        Register
+                    </button>
+                    <p class="login-link">
+                        Already have an account? <a href="/login">Login</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showUserForm() {
+            document.getElementById("selection-box").style.display = "none";
+            document.getElementById("user-form").style.display = "block";
+        }
+
+        function showAdminForm() {
+            document.getElementById("selection-box").style.display = "none";
+            document.getElementById("admin-form").style.display = "block";
+        }
+
+        function checkPasswordMatch(userType) {
+            const password = document.getElementById(userType + "-password").value;
+            const confirmPassword = document.getElementById(
+                userType + "-confirm-password"
+            ).value;
+            const errorMessage = document.getElementById(
+                userType + "-error-message"
+            );
+            const registerButton = document.getElementById(
+                userType + "-register-btn"
+            );
+
+            if (password !== confirmPassword) {
+                errorMessage.style.display = "block";
+                registerButton.disabled = true;
+            } else {
+                errorMessage.style.display = "none";
+                registerButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

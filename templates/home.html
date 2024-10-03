@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../static/home.css" />
+  <!-- Google Material Icons for UI icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <title>Blog Site</title>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Sidebar Section: Displays username, blog count, navigation options -->
+    <div class="sidebar">
+      <h2><span>{{ username|capitalize }}</span></h2>
+      <p class="blog-count">Total Blogs: <span>{{ blogCount }}</span></p>
+      <hr />
+
+      <!-- Show My Blogs / Show All Blogs for Admins -->
+      {% if user_role == 'admin' %}
+      {% if not show_mine_only %}
+      <a href="{{ url_for('home', show_mine_only='true') }}">
+        <button class="btn-show">Show My Blogs</button>
+      </a>
+      {% else %}
+      <a href="{{ url_for('home') }}">
+        <button class="btn-show">Show All Blogs</button>
+      </a>
+      {% endif %}
+      {% endif %}
+
+      <!-- Log out button -->
+      <a href="/logout">
+        <button class="btn-log">Log Out</button>
+      </a>
+    </div>
+
+    <!-- Content Section: Displays blogs and editing interface if enabled -->
+    <div class="content">
+      <h1>
+        <!-- Dynamic heading based on context (editing, user blogs, or all blogs) -->
+        {% if editing %} Edit Blog
+        {% elif show_mine_only %} {{ username|capitalize }}'s Blogs
+        {% else %} All Blogs {% endif %}
+      </h1>
+
+      <div class="blogs">
+        <!-- Loop through blogs if available -->
+        {% if blogs %}
+        {% for blog in blogs %}
+        <div class="blog-post">
+
+          <!-- User Info Section -->
+          {% if not editing %}
+          <div class="user-info">
+            <img class="user-logo" src="static/images/logo.png" alt="User Logo"
+              onclick="showPopup('{{ blog.username }}', '{{ blog.email }}', '{{ blog.mobile }}')" />
+            <div class="user-details">
+              <span class="username"
+                onclick="showPopup('{{ blog.username }}', '{{ blog.email }}', '{{ blog.mobile }}')">{{
+                blog.username|capitalize }}</span>
+              <span class="age">{{ blog.inserted_time|time_since }}</span>
+            </div>
+          </div>
+          {% endif %}
+
+          <div id="user-popup" class="popup">
+            <div class="popup-content">
+              <span class="close-btn" onclick="closePopup()">&times;</span>
+              <p><strong>Username:</strong> <span id="popup-username"></span></p>
+              <p><strong>Email:</strong> <span id="popup-email"></span></p>
+              <p><strong>Mobile:</strong> <span id="popup-mobile"></span></p>
+            </div>
+          </div>
+
+          <!-- Blog Content Section: Editable text area if in editing mode -->
+          <div class="blog-content">
+            {% if editing %}
+            <form action="/update-blog/{{ blog.id }}" method="POST">
+              <div class="blog-edit">
+                <textarea name="new_content" required>{{ blog.blog }}</textarea>
+                <button class="confirm-edit" type="submit">
+                  <i class="material-icons">&#xe876;</i>
+                </button>
+                <a href="/cancel-edit">
+                  <button class="del-btn" type="button">
+                    <i class="material-icons">&#xe5c9;</i>
+                  </button>
+                </a>
+              </div>
+            </form>
+            {% else %}
+            <p class="blog-p">{{ blog.blog }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Actions Section: Buttons for like, comment, edit, delete -->
+          <div class="actions">
+            <!-- Like and Comment Buttons -->
+            {% if not editing %}
+            <div class="action-like">
+              <form action="/like-blog/{{ blog.id }}" method="POST">
+                <input type="hidden" name="like" value="{{ 'false' if blog.liked_time else 'true' }}" />
+                <button type="submit" class="{{ 'liked' if blog.liked_time else 'not-liked' }}">
+                  &#10084;
+                </button>
+              </form>
+              <p class="like-count">{{ blog.likes_count }}</p>
+            </div>
+
+            <!-- Comment button toggles the display of comments -->
+            <button class="btn-comment" onclick="toggleComments({{ blog.id }})">
+              <i class="material-icons">&#xe0b9;</i>
+            </button>
+            <p class="comment-count">{{ blog.comments_count }}</p>
+            {% endif %}
+
+            <!-- Edit and Delete buttons available if viewing own blogs -->
+            {% if show_mine_only %}
+            <a href="/edit-blog/{{ blog.id }}">
+              <button class="btn-edit">
+                <i class="material-icons">&#xe254;</i>
+              </button>
+            </a>
+            <form action="/delete-blog/{{ blog.id }}" method="POST" style="display: inline"
+              onsubmit="return confirmDelete('post');">
+              <button class="btn-delete" type="submit">
+                <i class="material-icons">&#xe92b;</i>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+
+          <!-- Comments Section: Toggle display for blog comments -->
+          <div class="comments-section top-arrow" id="comments-{{ blog.id }}" style="display: none">
+            <!-- Display existing comments if available -->
+            {% if blog.comments %}
+            {% for comment in blog.comments %}
+            <div class="comment">
+              <div class="user-info">
+                <img class="user-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="User Logo" />
+                <strong class="username">{{ comment.username|capitalize }}</strong>
+                <span class="age">{{ comment.commented_date|time_since }}</span>
+              </div>
+
+              <div class="comment-text">
+                <!-- Edit or delete comment if the session user is the author -->
+                {% if session['username'] == comment.username %}
+                <form action="/edit-comment/{{ comment.reaction_id }}" method="POST">
+                  <textarea name="new_comment" required>{{ comment.comment_text }}</textarea>
+                  <div class="comment-actions">
+                    <button type="submit" class="btn-edit-cmt">
+                      <i class="material-icons">&#xe876;</i>
+                    </button>
+                </form>
+
+                <!-- Delete comment button -->
+                <form action="/delete-comment/{{ comment.reaction_id }}" method="POST"
+                  onsubmit="return confirmDelete('commment');" style="display:inline-block;">
+                  <button class="btn-del-cmt" type="submit">
+                    <i class="material-icons">&#xe92b;</i>
+                  </button>
+                </form>
+              </div>
+              {% else %}
+              <!-- Display comment text for non-authors -->
+              {{ comment.comment_text }}
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <p>No comments yet.</p>
+          {% endif %}
+
+          <!-- Form to add a new comment -->
+          <form class="form-comment" action="/add-comment/{{ blog.id }}" method="POST">
+            <textarea name="comment_content" placeholder="Add a comment" required></textarea>
+            <button type="submit">Add</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p class="no-blogs">No blogs found.</p>
+      {% endif %}
+    </div>
+
+    <!-- Add Blog Form: Only visible to admins -->
+    {% if user_role == 'admin' %}
+    {% if not show_mine_only %}
+    <div>
+      <form class="blog-add" action="/add-blog" method="POST">
+        <textarea name="new_blog_content" placeholder="Enter your new blog content" required></textarea>
+        <button class="btn-add" type="submit">Add Blog</button>
+      </form>
+    </div>
+    {% endif %}
+    {% endif %}
+  </div>
+  </div>
+
+  <script>
+    // Restore scroll position after page reload
+    document.addEventListener("DOMContentLoaded", function () {
+      const blogsDiv = document.querySelector(".blogs");
+      const savedScrollPosition = localStorage.getItem("blogsScrollPosition");
+      if (blogsDiv && savedScrollPosition) {
+        blogsDiv.scrollTop = parseInt(savedScrollPosition);
+      }
+    });
+
+    // Save scroll position before page reload
+    window.addEventListener("beforeunload", function () {
+      const blogsDiv = document.querySelector(".blogs");
+      if (blogsDiv) {
+        localStorage.setItem("blogsScrollPosition", blogsDiv.scrollTop);
+      }
+    });
+
+    // Confirm deletion of a blog or comment
+    function confirmDelete(str) {
+      return confirm(`Are you sure you want to delete this blog ${str}?`);
+    }
+
+    // Toggle the visibility of the comments section for a specific blog
+    function toggleComments(blogId) {
+      const commentsDiv = document.getElementById(`comments-${blogId}`);
+      commentsDiv.style.display = commentsDiv.style.display === "none" ? "block" : "none";
+    }
+
+    // Function to show the popup
+    function showPopup(username, email, mobile) {
+      document.getElementById("popup-username").textContent = username;
+      document.getElementById("popup-email").textContent = email;
+      document.getElementById("popup-mobile").textContent = mobile;
+      document.getElementById("user-popup").style.display = "block";
+    }
+
+    // Function to close the popup
+    function closePopup() {
+      document.getElementById("user-popup").style.display = "none";
+    }
+
+  </script>
+</body>
+
+</html>
