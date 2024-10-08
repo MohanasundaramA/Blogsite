@@ -81,7 +81,13 @@ body {
   overflow: auto;
 }
 
-.blogs::-webkit-scrollbar {
+.blogs_mine {
+  max-height: 450px;
+  overflow: auto;
+}
+
+.blogs::-webkit-scrollbar,
+.blogs_mine::-webkit-scrollbar {
   display: none;
 }
 
@@ -92,7 +98,7 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin-left: 50px;
   width: 87%;
-  padding-bottom: 30px;
+  padding-bottom: 40px;
   margin-bottom: 30px;
 }
 
@@ -183,6 +189,14 @@ body {
   background-color: #212121;
   padding: 10px;
   border-radius: 5px;
+
+  p {
+    padding-left: 10px;
+  }
+}
+
+.blog-image {
+  padding-left: 20px;
 }
 
 .blog-add {
@@ -190,11 +204,12 @@ body {
   display: flex;
   margin-left: 25px;
   bottom: 25px;
+  gap: 5px;
 }
 
 .blog-add textarea {
   height: 50px;
-  width: 850px;
+  width: 710px;
   background-color: #333;
   border: none;
   border-radius: 5px;
@@ -203,8 +218,22 @@ body {
   font-size: 18px;
 }
 
+.blog-add input,
+.blog-edit input {
+  display: none;
+}
+
+.blog-add label {
+  max-width: 100px;
+  padding: 10px;
+  background-color: #333;
+  border-radius: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .btn-add {
-  margin-left: 5px;
   margin-top: 10px;
   height: 40px;
   background: #e50914;
@@ -219,7 +248,6 @@ body {
 .actions {
   display: flex;
   float: left;
-  margin-top: -10px;
   margin-left: 30px;
   gap: 30px;
 }
@@ -250,6 +278,20 @@ body {
   background-color: #212121;
   outline: none;
   color: white;
+}
+
+#file-name-label,
+#file-name-edit-label,
+.del-image-btn {
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
 }
 
 .blog-edit button {
