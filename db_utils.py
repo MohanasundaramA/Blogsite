@@ -98,12 +98,12 @@ def get_all_blogs(email):
     """
     return get_blogs(query, email=email)
 
-def insert_blog(email, content):
-    query = "INSERT INTO blogs (email, blog, inserted_time) VALUES (%s, %s, NOW())"
-    execute_commit(query, (email, content))
+def insert_blog(email, content, image_url):
+    query = "INSERT INTO blogs (email, blog, image_url, inserted_time) VALUES (%s, %s, %s, NOW())"
+    execute_commit(query, (email, content, image_url))
 
-def update_blog_content(blog_id, new_content):
-    execute_commit("UPDATE blogs SET blog = %s, inserted_time = NOW() WHERE id = %s", (new_content, blog_id,))
+def update_blog_content(blog_id, new_content, image_url):
+    execute_commit("UPDATE blogs SET blog = %s, image_url = %s, inserted_time = NOW() WHERE id = %s", (new_content, image_url, blog_id,))
 
 def delete_blog_by_id(blog_id):
     execute_commit("DELETE FROM blogs WHERE id = %s", (blog_id,))
