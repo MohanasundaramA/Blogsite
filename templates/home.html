@@ -21,11 +21,11 @@
       <!-- Show My Blogs / Show All Blogs for Admins -->
       {% if user_role == 'admin' %}
       {% if not show_mine_only %}
-      <a href="{{ url_for('home', show_mine_only='true') }}">
+      <a href="{{ url_for('blog_bp.home', show_mine_only='true') }}">
         <button class="btn-show">Show My Blogs</button>
       </a>
       {% else %}
-      <a href="{{ url_for('home') }}">
+      <a href="{{ url_for('blog_bp.home') }}">
         <button class="btn-show">Show All Blogs</button>
       </a>
       {% endif %}
@@ -46,7 +46,7 @@
         {% else %} All Blogs {% endif %}
       </h1>
 
-      <div class="blogs">
+      <div class="{% if show_mine_only %}blogs_mine{% else %}blogs{% endif %}">
         <!-- Loop through blogs if available -->
         {% if blogs %}
         {% for blog in blogs %}
@@ -78,8 +78,20 @@
           <!-- Blog Content Section: Editable text area if in editing mode -->
           <div class="blog-content">
             {% if editing %}
-            <form action="/update-blog/{{ blog.id }}" method="POST">
+            <form action="/update-blog/{{ blog.id }}" method="POST" enctype="multipart/form-data">
               <div class="blog-edit">
+                {% if blog.image_url %}
+                <img src="{{ url_for('static', filename='uploads/' + blog.image_url) }}" alt="Blog Image"
+                  class="blog-exist-image" />
+                <button type="button" class="del-image-btn" onclick="deleteImage()">del image</button>
+                <input type="hidden" id="image_deleted" name="image_deleted" value="false" />
+                {% endif %}
+                <input type="file" id="blog-edit-image" name="blog_image" accept="image/*"
+                  onchange="displayEditFileName()" />
+                <label for="blog-edit-image" id="file-name-edit-label"
+                  class="{% if blog.image_url %}hidden{% else %}visible{% endif %}">
+                  <i class="material-icons">add_a_photo</i>
+                </label>
                 <textarea name="new_content" required>{{ blog.blog }}</textarea>
                 <button class="confirm-edit" type="submit">
                   <i class="material-icons">&#xe876;</i>
@@ -92,8 +104,14 @@
               </div>
             </form>
             {% else %}
-            <p class="blog-p">{{ blog.blog }}</p>
-            {% endif %}
+            <div class="blog-p">
+              {% if blog.image_url %}
+              <img src="{{ url_for('static', filename='uploads/' + blog.image_url) }}" alt="Blog Image"
+                class="blog-image" />
+              {% endif %}
+              <p>{{ blog.blog }}</p>
+              {% endif %}
+            </div>
           </div>
 
           <!-- Actions Section: Buttons for like, comment, edit, delete -->
@@ -192,10 +210,15 @@
     {% if user_role == 'admin' %}
     {% if not show_mine_only %}
     <div>
-      <form class="blog-add" action="/add-blog" method="POST">
-        <textarea name="new_blog_content" placeholder="Enter your new blog content" required></textarea>
-        <button class="btn-add" type="submit">Add Blog</button>
-      </form>
+      <div>
+        <form class="blog-add" action="/add-blog" method="POST" enctype="multipart/form-data">
+          <input type="file" id="blog-image" name="blog_image" accept="image/*" onchange="displayFileName()" />
+          <label for="blog-image" id="file-name-label"><i class="material-icons">add_a_photo</i></label>
+          <textarea name="new_blog_content" placeholder="Enter your new blog content" required></textarea>
+          <button class="btn-add" type="submit">Add Blog</button>
+        </form>
+      </div>
+
     </div>
     {% endif %}
     {% endif %}
@@ -242,6 +265,42 @@
     // Function to close the popup
     function closePopup() {
       document.getElementById("user-popup").style.display = "none";
+    }
+
+    // Function to display inserted image name
+    function displayFileName() {
+      const input = document.getElementById('blog-image');
+      const label = document.getElementById('file-name-label');
+
+      if (input.files.length > 0) {
+        label.textContent = input.files[0].name;
+        label.title = input.files[0].name;
+      }
+    }
+
+    function displayEditFileName() {
+      const input = document.getElementById('blog-edit-image');
+      const label = document.getElementById('file-name-edit-label');
+
+      if (input.files.length > 0) {
+        label.textContent = input.files[0].name;
+        label.title = input.files[0].name;
+      }
+    }
+
+    // Function to delete image
+    function deleteImage() {
+      const label = document.getElementById('file-name-edit-label');
+      const image = document.querySelector('.blog-exist-image');
+      const btn = document.querySelector('.del-image-btn');
+      const imageDeletedInput = document.getElementById('image_deleted');
+
+      if (image)
+        image.style.display = 'none';
+
+      btn.style.display = 'none';
+      label.style.display = 'block';
+      imageDeletedInput.value = 'true';
     }
 
   </script>
