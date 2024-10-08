@@ -56,7 +56,7 @@ def update_blog(blog_id):
         image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], existing_image)
         if os.path.exists(image_path):
             os.remove(image_path)
-        existing_image = ""
+        existing_image = None
 
     file = request.files.get('blog_image')
     new_image = handle_file_upload(file) if file else existing_image
